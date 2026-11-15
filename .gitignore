@@ -1,0 +1,13 @@
+**/node_modules/
+**/dist/
+**/target/
+.idea/
+.vscode/
+apache-maven-*/
+hs_err_pid*.log
+*.bkp
+*.bak
+*.backup
+env17.ps1
+.env
+.env.*
