@@ -1,0 +1,50 @@
+package com.edumarket.core.controllers;
+
+import com.edumarket.core.models.Referral;
+import com.edumarket.core.services.ReferralService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/referrals")
+public class ReferralController {
+
+    private final ReferralService referralService;
+
+    public ReferralController(ReferralService referralService) {
+        this.referralService = referralService;
+    }
+
+    @PostMapping("/generate")
+    public Referral generate(@RequestParam Long studentId) {
+        return referralService.generateCode(studentId);
+    }
+
+    @PostMapping("/apply")
+    public Referral apply(@RequestParam String code, @RequestParam Long studentId) {
+        return referralService.applyCode(code, studentId);
+    }
+
+    // The checkout (Feature 12) will call referralService.completeReferral(...) after a payment
+    // is PAID. This endpoint exists so we can test it by hand.
+    @PostMapping("/complete")
+    public Object complete(@RequestParam Long studentId) {
+        Optional<Referral> done = referralService.completeReferral(studentId);
+        if (done.isPresent()) {
+            return done.get();
+        }
+        return Map.of("message", "Nothing to complete: no pending referral, or no paid purchase yet");
+    }
+
+    @GetMapping("/mine")
+    public List<Referral> mine(@RequestParam Long studentId) {
+        return referralService.findMine(studentId);
+    }
+}
