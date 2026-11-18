@@ -6,7 +6,7 @@ const DEFAULT_API = typeof window !== "undefined" && window.location.hostname !=
 const BASE_URL = (import.meta.env.VITE_API_URL || DEFAULT_API).replace(/\/$/, "");
 const API = `${BASE_URL}/api`;
 
-const FALLBACK_STUDENTS = {
+const SEEDED_STUDENTS = {
   "1": { studentId: 11, name: "Student One", email: "1", password: "1", major: "CSE", level: "Undergraduate", rewardPoints: 150 },
   "2": { studentId: 12, name: "Student Two", email: "2", password: "2", major: "EEE", level: "Undergraduate", rewardPoints: 90 },
 };
@@ -51,48 +51,64 @@ const FALLBACK_COURSES = [
 ];
 
 export async function loginStudent(email, password) {
+  const cleanEmail = String(email || "").trim();
+  const cleanPass = String(password || "").trim();
+
+  // Instant check for seeded & locally registered accounts so login takes 0ms even if Render is waking up
+  const localUsers = JSON.parse(localStorage.getItem("edumarket_registered_users") || "{}");
+  const allKnown = { ...SEEDED_STUDENTS, ...localUsers };
+  const known = allKnown[cleanEmail];
+  if (known && String(known.password) === cleanPass) {
+    // Sync with backend asynchronously in background without blocking login UI
+    axios.post(`${API}/auth/login`, { email: cleanEmail, password: cleanPass }, { timeout: 4000 }).catch(() => {});
+    return known;
+  }
+
   try {
-    const res = await axios.post(`${API}/auth/login`, { email, password });
+    const res = await axios.post(
+      `${API}/auth/login`,
+      { email: cleanEmail, password: cleanPass },
+      { timeout: 3500 }
+    );
     return res.data;
   } catch (err) {
-    if (err.response && err.response.status === 401) {
-      throw new Error("Invalid Email ID or Password");
-    }
-    // Check local fallback if backend is still deploying/waking up
-    const localUsers = JSON.parse(localStorage.getItem("edumarket_registered_users") || "{}");
-    const allUsers = { ...FALLBACK_STUDENTS, ...localUsers };
-    const matched = allUsers[String(email).trim()];
-    if (matched && String(matched.password) === String(password).trim()) {
-      return matched;
-    }
-    throw new Error("Invalid Email ID or Password. Try Email ID: 1, Pass: 1 (or Email ID: 2, Pass: 2)");
+    throw new Error("Invalid Email ID or Password");
   }
 }
 
 export async function registerStudent({ name, email, password, major, level }) {
-  try {
-    const res = await axios.post(`${API}/auth/register`, { name, email, password, major, level });
-    return res.data;
-  } catch (err) {
-    const localUsers = JSON.parse(localStorage.getItem("edumarket_registered_users") || "{}");
-    const newStudent = {
-      studentId: Date.now(),
-      name: name || `Student ${email}`,
-      email: String(email).trim(),
-      password: String(password).trim(),
-      major: major || "CSE",
-      level: level || "Undergraduate",
-      rewardPoints: 50,
-    };
-    localUsers[newStudent.email] = newStudent;
-    localStorage.setItem("edumarket_registered_users", JSON.stringify(localUsers));
-    return newStudent;
-  }
+  const cleanEmail = String(email || "").trim();
+  const cleanPass = String(password || "").trim();
+  const newStudent = {
+    studentId: Date.now(),
+    name: name || `Student ${cleanEmail}`,
+    email: cleanEmail,
+    password: cleanPass,
+    major: major || "CSE",
+    level: level || "Undergraduate",
+    rewardPoints: 50,
+  };
+
+  // Save locally immediately for instant registration
+  const localUsers = JSON.parse(localStorage.getItem("edumarket_registered_users") || "{}");
+  localUsers[cleanEmail] = newStudent;
+  localStorage.setItem("edumarket_registered_users", JSON.stringify(localUsers));
+
+  // Sync to backend in background without delaying the user
+  axios
+    .post(
+      `${API}/auth/register`,
+      { name: newStudent.name, email: cleanEmail, password: cleanPass, major: newStudent.major, level: newStudent.level },
+      { timeout: 4000 }
+    )
+    .catch(() => {});
+
+  return newStudent;
 }
 
 export async function fetchAllCourses() {
   try {
-    const res = await axios.get(`${API}/courses`);
+    const res = await axios.get(`${API}/courses`, { timeout: 2500 });
     if (Array.isArray(res.data) && res.data.length > 0) return res.data;
     return FALLBACK_COURSES;
   } catch {
@@ -101,39 +117,35 @@ export async function fetchAllCourses() {
 }
 
 export async function fetchWishlist(studentId) {
+  const saved = JSON.parse(localStorage.getItem(`wishlist_${studentId}`) || "null");
   try {
-    const res = await axios.get(`${API}/wishlist/${studentId}`);
-    return res.data;
+    const res = await axios.get(`${API}/wishlist/${studentId}`, { timeout: 2500 });
+    if (Array.isArray(res.data)) {
+      localStorage.setItem(`wishlist_${studentId}`, JSON.stringify(res.data));
+      return res.data;
+    }
   } catch {
-    const saved = JSON.parse(localStorage.getItem(`wishlist_${studentId}`) || "null");
-    if (saved) return saved;
-    const defaultId = Number(studentId) === 12 ? 1 : 2;
-    const initial = FALLBACK_COURSES.filter((c) => c.courseId === defaultId);
-    localStorage.setItem(`wishlist_${studentId}`, JSON.stringify(initial));
-    return initial;
+    // Use local cache if Render is waking up
   }
+  if (saved) return saved;
+  const defaultId = Number(studentId) === 12 ? 1 : 2;
+  const initial = FALLBACK_COURSES.filter((c) => c.courseId === defaultId);
+  localStorage.setItem(`wishlist_${studentId}`, JSON.stringify(initial));
+  return initial;
 }
 
 export async function addCourseToWishlist(studentId, course) {
-  try {
-    await axios.post(`${API}/wishlist/${studentId}/${course.courseId}`);
-  } catch {
-    // Also persist locally so UI is instant
-  }
   const current = JSON.parse(localStorage.getItem(`wishlist_${studentId}`) || "[]");
   if (!current.some((c) => c.courseId === course.courseId)) {
     const updated = [course, ...current];
     localStorage.setItem(`wishlist_${studentId}`, JSON.stringify(updated));
   }
+  axios.post(`${API}/wishlist/${studentId}/${course.courseId}`, {}, { timeout: 4000 }).catch(() => {});
 }
 
 export async function removeCourseFromWishlist(studentId, courseId) {
-  try {
-    await axios.delete(`${API}/wishlist/${studentId}/${courseId}`);
-  } catch {
-    // Also persist locally
-  }
   const current = JSON.parse(localStorage.getItem(`wishlist_${studentId}`) || "[]");
   const updated = current.filter((c) => c.courseId !== courseId);
   localStorage.setItem(`wishlist_${studentId}`, JSON.stringify(updated));
+  axios.delete(`${API}/wishlist/${studentId}/${courseId}`, { timeout: 4000 }).catch(() => {});
 }

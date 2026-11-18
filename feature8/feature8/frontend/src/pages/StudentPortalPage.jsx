@@ -236,7 +236,7 @@ export default function StudentPortalPage() {
               <label>Email ID</label>
               <input
                 type="text"
-                placeholder="Enter Email ID (e.g. 1 or 2)"
+                placeholder="Enter your Email ID"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -247,7 +247,7 @@ export default function StudentPortalPage() {
               <label>Password</label>
               <input
                 type="password"
-                placeholder="Enter Password (e.g. 1 or 2)"
+                placeholder="Enter your Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -283,34 +283,6 @@ export default function StudentPortalPage() {
                 : "Register & Continue"}
             </button>
           </form>
-
-          <div className="auth-demo-box">
-            <div>Quick Demo Student Accounts (in Database):</div>
-            <div className="auth-demo-btns">
-              <button
-                type="button"
-                className="auth-demo-btn"
-                onClick={() => {
-                  setAuthMode("login");
-                  setEmail("1");
-                  setPassword("1");
-                }}
-              >
-                Fill Student 1 (ID: 1 / Pass: 1)
-              </button>
-              <button
-                type="button"
-                className="auth-demo-btn"
-                onClick={() => {
-                  setAuthMode("login");
-                  setEmail("2");
-                  setPassword("2");
-                }}
-              >
-                Fill Student 2 (ID: 2 / Pass: 2)
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     );
