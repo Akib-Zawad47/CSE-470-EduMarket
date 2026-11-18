@@ -51,6 +51,70 @@ const STUDENT_CURRENT_COURSES = {
       price: 6000,
     },
   ],
+  "tanvir@edumarket.test": [
+    {
+      courseId: 1,
+      title: "Full-Stack Web Development",
+      description: "HTML, CSS, JS, Node and PostgreSQL.",
+      level: "Beginner",
+      instructorName: "Rahim Uddin",
+      progress: 80,
+      price: 4500,
+    },
+    {
+      courseId: 3,
+      title: "Python for Data Science",
+      description: "Pandas, NumPy and visualization.",
+      level: "Beginner",
+      instructorName: "Farhana Akter",
+      progress: 50,
+      price: 4000,
+    },
+  ],
+  "mim@edumarket.test": [
+    {
+      courseId: 1,
+      title: "Full-Stack Web Development",
+      description: "HTML, CSS, JS, Node and PostgreSQL.",
+      level: "Beginner",
+      instructorName: "Rahim Uddin",
+      progress: 65,
+      price: 4500,
+    },
+  ],
+  "arif@edumarket.test": [
+    {
+      courseId: 2,
+      title: "Spring Boot in Practice",
+      description: "REST APIs with Spring Boot and JPA.",
+      level: "Intermediate",
+      instructorName: "Rahim Uddin",
+      progress: 20,
+      price: 5500,
+    },
+  ],
+  "sadia@edumarket.test": [
+    {
+      courseId: 3,
+      title: "Python for Data Science",
+      description: "Pandas, NumPy and visualization.",
+      level: "Beginner",
+      instructorName: "Farhana Akter",
+      progress: 100,
+      price: 4000,
+    },
+  ],
+  "imran@edumarket.test": [
+    {
+      courseId: 4,
+      title: "Machine Learning Basics",
+      description: "Supervised learning from scratch.",
+      level: "Intermediate",
+      instructorName: "Farhana Akter",
+      progress: 15,
+      price: 6000,
+    },
+  ],
 };
 
 export default function StudentPortalPage() {

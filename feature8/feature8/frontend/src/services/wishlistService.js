@@ -9,6 +9,11 @@ const API = `${BASE_URL}/api`;
 const SEEDED_STUDENTS = {
   "1": { studentId: 11, name: "Student One", email: "1", password: "1", major: "CSE", level: "Undergraduate", rewardPoints: 150 },
   "2": { studentId: 12, name: "Student Two", email: "2", password: "2", major: "EEE", level: "Undergraduate", rewardPoints: 90 },
+  "tanvir@edumarket.test": { studentId: 4, name: "Tanvir Hasan", email: "tanvir@edumarket.test", password: "hash_stu1", major: "CSE", level: "Undergraduate", rewardPoints: 120 },
+  "mim@edumarket.test": { studentId: 5, name: "Mim Sultana", email: "mim@edumarket.test", password: "hash_stu2", major: "EEE", level: "Undergraduate", rewardPoints: 40 },
+  "arif@edumarket.test": { studentId: 6, name: "Arif Hossain", email: "arif@edumarket.test", password: "hash_stu3", major: "BBA", level: "Graduate", rewardPoints: 0 },
+  "sadia@edumarket.test": { studentId: 7, name: "Sadia Islam", email: "sadia@edumarket.test", password: "hash_stu4", major: "CSE", level: "Undergraduate", rewardPoints: 75 },
+  "imran@edumarket.test": { studentId: 8, name: "Imran Khan", email: "imran@edumarket.test", password: "hash_stu5", major: "English", level: "Undergraduate", rewardPoints: 10 },
 };
 
 const FALLBACK_COURSES = [
