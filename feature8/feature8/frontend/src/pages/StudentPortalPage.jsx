@@ -4,6 +4,7 @@ import {
   loginStudent,
   registerStudent,
   fetchAllCourses,
+  fetchStudentEnrollments,
   fetchWishlist,
   addCourseToWishlist,
   removeCourseFromWishlist,
@@ -140,6 +141,7 @@ export default function StudentPortalPage() {
   // Dashboard states
   const [activeNav, setActiveNav] = useState("dashboard");
   const [allCourses, setAllCourses] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
@@ -168,6 +170,8 @@ export default function StudentPortalPage() {
       ]);
       setAllCourses(coursesData);
       setWishlist(wishlistData);
+      const enrolledData = await fetchStudentEnrollments(studentId, coursesData);
+      setEnrolledCourses(enrolledData);
     } finally {
       setWishlistLoading(false);
     }
@@ -352,9 +356,11 @@ export default function StudentPortalPage() {
     );
   }
 
-  // Current courses for the logged-in student
+  // Current courses for the logged-in student (from live enrollments table, or fallback)
   const currentEnrolledCourses =
-    STUDENT_CURRENT_COURSES[String(student.email)] || STUDENT_CURRENT_COURSES["1"];
+    enrolledCourses.length > 0
+      ? enrolledCourses
+      : STUDENT_CURRENT_COURSES[String(student.email)] || STUDENT_CURRENT_COURSES["1"];
 
   // 2. LOGGED IN -> SHOW SIDEBAR & DASHBOARD MATCHING IMAGE
   return (
