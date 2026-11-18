@@ -1,6 +1,7 @@
 package com.edumarket.core.controllers;
 
 import com.edumarket.core.services.RewardService;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rewards")
+@CrossOrigin(originPatterns = "*")
 public class RewardController {
 
     private final RewardService rewardService;

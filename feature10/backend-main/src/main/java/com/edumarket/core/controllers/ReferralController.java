@@ -2,6 +2,7 @@ package com.edumarket.core.controllers;
 
 import com.edumarket.core.models.Referral;
 import com.edumarket.core.services.ReferralService;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/referrals")
+@CrossOrigin(originPatterns = "*")
 public class ReferralController {
 
     private final ReferralService referralService;

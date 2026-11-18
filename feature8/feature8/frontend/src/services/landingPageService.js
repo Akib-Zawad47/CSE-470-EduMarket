@@ -1,7 +1,8 @@
 import axios from "axios";
 
-// Change this if your Spring Boot server runs on another host or port.
-const API = "http://localhost:8080/api";
+// Uses VITE_API_URL in production (e.g. Render/Railway backend URL on Vercel) and falls back to localhost:8080 locally.
+const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/$/, "");
+const API = `${BASE_URL}/api`;
 
 export async function fetchPages() {
   return (await axios.get(`${API}/landing-pages`)).data;
