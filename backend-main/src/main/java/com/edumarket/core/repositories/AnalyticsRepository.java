@@ -1,5 +1,5 @@
 package com.edumarket.core.repositories;
-
+import com.edumarket.core.models.CourseOptionDto;
 import com.edumarket.core.models.FunnelStageDto;
 import com.edumarket.core.models.TrendingCourseDto;
 import com.edumarket.core.models.TrendingCourseView;
@@ -29,4 +29,7 @@ public interface AnalyticsRepository extends JpaRepository<TrendingCourseView, L
         WHERE course_id = :courseId
         """, nativeQuery = true)
     List<FunnelStageDto> findFunnelByCourseId(@Param("courseId") Long courseId);
+
+    @Query(value = "SELECT course_id AS courseId, title AS title FROM courses ORDER BY course_id ASC", nativeQuery = true)
+    List<CourseOptionDto> findAllCourseOptions();
 }

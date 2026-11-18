@@ -1,8 +1,11 @@
 package com.edumarket.core.services;
 
+import com.edumarket.core.models.CourseOptionDto;
+import com.edumarket.core.models.FunnelEvent;
 import com.edumarket.core.models.FunnelStageDto;
 import com.edumarket.core.models.TrendingCourseDto;
 import com.edumarket.core.repositories.AnalyticsRepository;
+import com.edumarket.core.repositories.FunnelEventRepository;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,9 +16,29 @@ import java.util.Map;
 public class AnalyticsService {
 
     private final AnalyticsRepository analyticsRepository;
+    private final FunnelEventRepository funnelEventRepository;
 
-    public AnalyticsService(AnalyticsRepository analyticsRepository) {
+    public AnalyticsService(AnalyticsRepository analyticsRepository,
+                            FunnelEventRepository funnelEventRepository) {
         this.analyticsRepository = analyticsRepository;
+        this.funnelEventRepository = funnelEventRepository;
+    }
+
+    public List<CourseOptionDto> getAllCourses() {
+        return analyticsRepository.findAllCourseOptions();
+    }
+
+    public FunnelEvent recordFunnelEvent(Long userId, Long courseId, String eventType) {
+        List<String> allowed = List.of("PAGE_VIEW", "SEARCH", "ADD_TO_CART", "CHECKOUT_START", "PURCHASE", "ABANDON");
+        String normalized = eventType == null ? "" : eventType.trim().toUpperCase();
+        if (!allowed.contains(normalized)) {
+            throw new IllegalArgumentException("Invalid eventType: " + eventType);
+        }
+        FunnelEvent event = new FunnelEvent();
+        event.setUserId(userId != null ? userId : 3L);
+        event.setCourseId(courseId);
+        event.setEventType(normalized);
+        return funnelEventRepository.save(event);
     }
 
     public List<TrendingCourseDto> getTrendingCourses() {

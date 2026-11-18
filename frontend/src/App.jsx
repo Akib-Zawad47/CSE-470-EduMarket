@@ -1,10 +1,10 @@
 import React from 'react';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 function App() {
   return (
-    <div className="App">
-      <h1>EduMarket Platform</h1>
-      <p>React Frontend Connected to Spring Boot</p>
+    <div style={{ backgroundColor: '#f3f4f6', minHeight: '100vh' }}>
+      <AnalyticsDashboard />
     </div>
   );
 }
