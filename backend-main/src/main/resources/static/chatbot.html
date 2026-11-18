@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduMarket AI Assistant - Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md p-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl">🎓</span>
+            <h1 class="text-xl font-bold">EduMarket AI Support</h1>
+        </div>
+        <a href="/" class="text-sm bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded transition">Back to Home</a>
+    </header>
+
+    <!-- Chat Container -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 max-w-4xl w-full mx-auto space-y-4">
+        <!-- Welcome Message -->
+        <div class="flex items-start space-x-3">
+            <div class="bg-indigo-600 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold flex-shrink-0 text-xs">AI</div>
+            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm max-w-xl text-slate-800 text-sm">
+                Hello! Welcome to <strong>EduMarket</strong>. I'm EduBot. Your chats are safely stored in our database! Ask me about courses, prices, or enrollments.
+            </div>
+        </div>
+    </main>
+
+    <!-- Typing Indicator -->
+    <div id="loading" class="hidden max-w-4xl mx-auto px-4 py-2 flex items-center space-x-2 text-slate-400 text-xs">
+        <div class="bg-indigo-600 text-white rounded-full h-6 w-6 flex items-center justify-center font-bold text-[10px]">AI</div>
+        <div class="bg-white border border-slate-200 px-3 py-2 rounded-xl shadow-sm flex space-x-1 items-center">
+            <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></span>
+            <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce delay-150"></span>
+            <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce delay-300"></span>
+            <span class="ml-1 text-slate-500">EduBot is thinking...</span>
+        </div>
+    </div>
+
+    <!-- Input Footer -->
+    <footer class="bg-white border-t border-slate-200 p-4 shadow-lg">
+        <div class="max-w-4xl mx-auto flex gap-2">
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="Ask about courses, discounts, enrollments..." 
+                class="flex-1 border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                onkeydown="handleKeyPress(event)"
+            />
+            <button 
+                onclick="sendMessage()" 
+                id="send-btn"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition flex items-center justify-center text-sm shadow">
+                Send
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const loadingIndicator = document.getElementById('loading');
+        
+        let currentSessionId = localStorage.getItem('edumarket_chat_session_id') || null;
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, 'user');
+            userInput.value = '';
+            scrollToBottom();
+
+            loadingIndicator.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/chatbot/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userId: 1, 
+                        sessionId: currentSessionId ? parseInt(currentSessionId) : null, 
+                        message: text 
+                    })
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+                if (data.sessionId) {
+                    currentSessionId = data.sessionId;
+                    localStorage.setItem('edumarket_chat_session_id', currentSessionId);
+                }
+
+                loadingIndicator.classList.add('hidden');
+                appendMessage(data.response, 'ai');
+            } catch (error) {
+                loadingIndicator.classList.add('hidden');
+                appendMessage('Sorry, I am unable to connect to the server right now.', 'ai');
+            }
+            scrollToBottom();
+        }
+
+        function appendMessage(text, sender) {
+            const isUser = sender === 'user';
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `${isUser ? 'bg-slate-700' : 'bg-indigo-600'} text-white rounded-full h-8 w-8 flex items-center justify-center font-bold flex-shrink-0 text-xs`;
+            avatar.innerText = isUser ? 'YOU' : 'AI';
+
+            const bubble = document.createElement('div');
+            bubble.className = `${isUser ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-800'} p-4 rounded-2xl shadow-sm max-w-xl text-sm leading-relaxed`;
+            bubble.innerText = text;
+
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+            chatContainer.appendChild(wrapper);
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
