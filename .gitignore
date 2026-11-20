@@ -1,0 +1,10 @@
+node_modules/
+target/
+*.class
+*.pyc
+__pycache__/
+.env
+venv/
+.idea/
+.vscode/
+application-local.properties
